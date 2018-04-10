@@ -25,13 +25,13 @@ public class SalaryCalculator {
 		return this;
 	}
 
-	public Double berechne(Double basisgehalt) {
+	public Double calculate(Double baseSalary) {
 		// @formatter:off
 		return ROUND_DEFAULT.apply(rules
 			.stream()
 			.limit(this.getLimit())
 			.reduce(Function.identity(), Function::andThen)
-			.apply(basisgehalt));
+			.apply(baseSalary));
 		// @formatter:on
 	}
 

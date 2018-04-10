@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class GehaltsrechnerTest {
+public class SalaryCalculatorTest {
 
 	// @formatter:off
 	/**
@@ -38,16 +38,16 @@ public class GehaltsrechnerTest {
 	@Test
 	public void testGehaltsberechnungA() {
 		// @formatter:off
-		Double gehalt = SalaryCalculator
+		Double salary = SalaryCalculator
 			.create()
-			.with(SalaryCalculationRule.ZULAGE_ADDIEREN)
-			.with(SalaryCalculationRule.BONUS.curryWith(54.0))
-			.with(SalaryCalculationRule.STANDARD_STEUERSATZ_ABZIEHEN)
-			.with(SalaryCalculationRule.VORGESETZTEN_SPECIAL.curryWith(SalaryCalculationRule.SUBTRACT).curryWith(23.0))
-			.berechne(2300.0);
+			.with(SalaryCalculationRule.ADD_DEFAULT_PREMIUM)
+			.with(SalaryCalculationRule.PREMIUM.curryWith(54.0))
+			.with(SalaryCalculationRule.SUBTRACT_DEFAULT_TAX)
+			.with(SalaryCalculationRule.SUPERVISOR_SPECIAL.curryWith(SalaryCalculationRule.SUBTRACT).curryWith(23.0))
+			.calculate(2300.0);
 		// @formatter:on
 
-		assertEquals(new Double(1106.76), gehalt);
+		assertEquals(new Double(1106.76), salary);
 	}
 
 	// @formatter:off
@@ -62,15 +62,15 @@ public class GehaltsrechnerTest {
 	@Test
 	public void testGehaltsberechnungB() {
 		// @formatter:off
-		Double gehalt = SalaryCalculator
+		Double salary = SalaryCalculator
 			.create()
-			.with(SalaryCalculationRule.ZULAGE_ADDIEREN)
-			.with(SalaryCalculationRule.STANDARD_STEUERSATZ_ABZIEHEN)
-			.with(SalaryCalculationRule.STEUERSATZ_ABZIEHEN.curryWith(0.01))
-			.berechne(2120.0);
+			.with(SalaryCalculationRule.ADD_DEFAULT_PREMIUM)
+			.with(SalaryCalculationRule.SUBTRACT_DEFAULT_TAX)
+			.with(SalaryCalculationRule.SUBTRACT_TAX.curryWith(0.01))
+			.calculate(2120.0);
 		// @formatter:on
 
-		assertEquals(new Double(1011.9), gehalt);
+		assertEquals(new Double(1011.9), salary);
 	}
 
 	// @formatter:off
@@ -86,17 +86,17 @@ public class GehaltsrechnerTest {
 	@Test
 	public void testGehaltsberechnungC() {
 		// @formatter:off
-		Double gehalt = SalaryCalculator
+		Double salary = SalaryCalculator
 			.create()
-			.with(SalaryCalculationRule.ZULAGE_ADDIEREN)
-			.with(SalaryCalculationRule.BONUS.curryWith(102.0))
-			.with(SalaryCalculationRule.STANDARD_STEUERSATZ_ABZIEHEN)
-			.with(SalaryCalculationRule.STEUERSATZ_ABZIEHEN.curryWith(0.12))
-			.with(SalaryCalculationRule.VORGESETZTEN_SPECIAL.curryWith(SalaryCalculationRule.SUM).curryWith(233.0))
-			.berechne(1020.0);
+			.with(SalaryCalculationRule.ADD_DEFAULT_PREMIUM)
+			.with(SalaryCalculationRule.PREMIUM.curryWith(102.0))
+			.with(SalaryCalculationRule.SUBTRACT_DEFAULT_TAX)
+			.with(SalaryCalculationRule.SUBTRACT_TAX.curryWith(0.12))
+			.with(SalaryCalculationRule.SUPERVISOR_SPECIAL.curryWith(SalaryCalculationRule.SUM).curryWith(233.0))
+			.calculate(1020.0);
 		// @formatter:on
 
-		assertEquals(new Double(728.48), gehalt);
+		assertEquals(new Double(728.48), salary);
 	}
 
 	// @formatter:off
@@ -112,20 +112,20 @@ public class GehaltsrechnerTest {
 	@Test
 	public void testGehaltsberechnungCMitAssertionNachErsterDritterUndLetzterRegel() {
 		// @formatter:off
-		SalaryCalculator gehaltsrechnerKonfiguriert = SalaryCalculator
+		SalaryCalculator salaryCalculatorConfigured = SalaryCalculator
 			.create()
-			.with(SalaryCalculationRule.ZULAGE_ADDIEREN)
-			.with(SalaryCalculationRule.BONUS.curryWith(102.0))
-			.with(SalaryCalculationRule.STANDARD_STEUERSATZ_ABZIEHEN)
-			.with(SalaryCalculationRule.STEUERSATZ_ABZIEHEN.curryWith(0.12))
-			.with(SalaryCalculationRule.VORGESETZTEN_SPECIAL.curryWith(SalaryCalculationRule.SUM).curryWith(233.0));
+			.with(SalaryCalculationRule.ADD_DEFAULT_PREMIUM)
+			.with(SalaryCalculationRule.PREMIUM.curryWith(102.0))
+			.with(SalaryCalculationRule.SUBTRACT_DEFAULT_TAX)
+			.with(SalaryCalculationRule.SUBTRACT_TAX.curryWith(0.12))
+			.with(SalaryCalculationRule.SUPERVISOR_SPECIAL.curryWith(SalaryCalculationRule.SUM).curryWith(233.0));
 		// @formatter:on
 
-		Double gehaltNachRegelDrei = gehaltsrechnerKonfiguriert.withLimit(3).berechne(1020.0);
-		Double gehaltNachRegelAlle = gehaltsrechnerKonfiguriert.withLimit(null).berechne(1020.0);
+		Double salaryAfterThreeRules = salaryCalculatorConfigured.withLimit(3).calculate(1020.0);
+		Double salaryAfterAllRules = salaryCalculatorConfigured.withLimit(null).calculate(1020.0);
 
-		assertEquals(new Double(563.04), gehaltNachRegelDrei);
-		assertEquals(new Double(728.48), gehaltNachRegelAlle);
+		assertEquals(new Double(563.04), salaryAfterThreeRules);
+		assertEquals(new Double(728.48), salaryAfterAllRules);
 	}
 
 	// @formatter:off
@@ -143,16 +143,16 @@ public class GehaltsrechnerTest {
 		// @formatter:off
 		ExtendedFunction<Double, Double, Double> MULTIPLY = (a, b) -> a * b;
 
-		Double gehalt = SalaryCalculator
+		Double salary = SalaryCalculator
 			.create()
 			.with(MULTIPLY.curryWith(3.0))
-			.with(SalaryCalculationRule.ZULAGE_ADDIEREN)
-			.with(SalaryCalculationRule.STANDARD_STEUERSATZ_ABZIEHEN)
-			.with(SalaryCalculationRule.STEUERSATZ_ABZIEHEN.curryWith(0.12))
-			.berechne(1020.0);
+			.with(SalaryCalculationRule.ADD_DEFAULT_PREMIUM)
+			.with(SalaryCalculationRule.SUBTRACT_DEFAULT_TAX)
+			.with(SalaryCalculationRule.SUBTRACT_TAX.curryWith(0.12))
+			.calculate(1020.0);
 		// @formatter:on
 
-		assertEquals(new Double(1279.98), gehalt);
+		assertEquals(new Double(1279.98), salary);
 	}
 
 }
